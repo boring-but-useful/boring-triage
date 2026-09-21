@@ -5,6 +5,7 @@
 - Keep `main` stable. Use short-lived branches for implementation once the initial local scaffold is committed.
 - Keep each change tied to one documented slice and preserve an offline test path.
 - Prefer small, explicit domain models and functions over speculative frameworks or abstractions.
+- Keep names, control flow, and module boundaries readable before adding explanatory comments. Add short comments only where the security or design reason would otherwise be easy to miss.
 - Update the README and relevant design document when behavior or a trust boundary changes.
 
 ## Security Rules
@@ -31,3 +32,5 @@ From the repository root:
 ```bash
 make verify
 ```
+
+Run `make audit` separately when network access is available. Do not weaken or bypass a failing check merely to publish a branch.

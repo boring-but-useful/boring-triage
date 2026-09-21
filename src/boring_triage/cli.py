@@ -12,7 +12,9 @@ from boring_triage.tools import EvidenceService
 
 
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Inspect a validated Boring Triage case")
+    parser = argparse.ArgumentParser(
+        description="Inspect a validated Boring Triage case"
+    )
     parser.add_argument("--case", required=True, help="Trusted local case directory")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("overview", help="Print the validated case overview")

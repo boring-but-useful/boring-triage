@@ -3,17 +3,19 @@
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from ipaddress import ip_address
 from pathlib import Path
-from typing import Annotated, TypeAlias
+from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-JsonScalar: TypeAlias = str | int | float | bool | None
-AttributeValue: TypeAlias = JsonScalar | list[JsonScalar]
+type JsonScalar = str | int | float | bool | None
+type AttributeValue = JsonScalar | list[JsonScalar]
 
-CaseId = Annotated[str, Field(pattern=r"^case-[a-z0-9-]+$", min_length=8, max_length=80)]
+CaseId = Annotated[
+    str, Field(pattern=r"^case-[a-z0-9-]+$", min_length=8, max_length=80)
+]
 EvidenceId = Annotated[str, Field(pattern=r"^ev-[0-9]{4}$")]
 ResourceId = Annotated[str, Field(pattern=r"^[a-z][a-z0-9-]{2,79}$")]
 
@@ -24,7 +26,7 @@ class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
 
-class SourceType(str, Enum):
+class SourceType(StrEnum):
     CLOUDTRAIL = "cloudtrail"
     VPC_FLOW_LOG = "vpc_flow_log"
     GUARDDUTY = "guardduty"
@@ -33,7 +35,7 @@ class SourceType(str, Enum):
     WORKLOAD_METADATA = "workload_metadata"
 
 
-class EventCategory(str, Enum):
+class EventCategory(StrEnum):
     IDENTITY_SESSION = "identity_session"
     API_ACTIVITY = "api_activity"
     NETWORK_CONNECTION = "network_connection"
@@ -43,7 +45,7 @@ class EventCategory(str, Enum):
     WORKLOAD_CONTEXT = "workload_context"
 
 
-class TrustLevel(str, Enum):
+class TrustLevel(StrEnum):
     UNTRUSTED_INPUT = "untrusted_input"
 
 
@@ -58,7 +60,9 @@ def _validate_attributes(value: dict[str, AttributeValue]) -> dict[str, Attribut
         raise ValueError("attributes may contain at most 50 fields")
     for name, attribute in value.items():
         if not name or len(name) > 80 or not name.replace("_", "").isalnum():
-            raise ValueError("attribute names must contain only letters, digits, and underscores")
+            raise ValueError(
+                "attribute names must contain only letters, digits, and underscores"
+            )
         values = attribute if isinstance(attribute, list) else [attribute]
         if len(values) > 100:
             raise ValueError("attribute lists may contain at most 100 values")
@@ -126,7 +130,9 @@ class EvidenceRecord(StrictModel):
 
     @field_validator("attributes")
     @classmethod
-    def attribute_names_are_safe(cls, value: dict[str, AttributeValue]) -> dict[str, AttributeValue]:
+    def attribute_names_are_safe(
+        cls, value: dict[str, AttributeValue]
+    ) -> dict[str, AttributeValue]:
         return _validate_attributes(value)
 
 
@@ -145,16 +151,22 @@ class ResourceContext(StrictModel):
 
     @field_validator("attributes")
     @classmethod
-    def attribute_names_are_safe(cls, value: dict[str, AttributeValue]) -> dict[str, AttributeValue]:
+    def attribute_names_are_safe(
+        cls, value: dict[str, AttributeValue]
+    ) -> dict[str, AttributeValue]:
         return _validate_attributes(value)
 
 
 class EvidenceFile(StrictModel):
-    records: Annotated[tuple[EvidenceRecord, ...], Field(min_length=1, max_length=1_000)]
+    records: Annotated[
+        tuple[EvidenceRecord, ...], Field(min_length=1, max_length=1_000)
+    ]
 
 
 class ResourceContextFile(StrictModel):
-    resources: Annotated[tuple[ResourceContext, ...], Field(min_length=1, max_length=500)]
+    resources: Annotated[
+        tuple[ResourceContext, ...], Field(min_length=1, max_length=500)
+    ]
 
 
 class CaseBundle(StrictModel):
@@ -172,7 +184,9 @@ class EvidenceSearch(StrictModel):
         Field(min_length=1, max_length=80, pattern=r"^[A-Za-z0-9._:@/-]+$"),
     ] = None
     source_address: Annotated[str | None, Field(min_length=1, max_length=64)] = None
-    destination_address: Annotated[str | None, Field(min_length=1, max_length=64)] = None
+    destination_address: Annotated[str | None, Field(min_length=1, max_length=64)] = (
+        None
+    )
     event_category: EventCategory | None = None
     limit: Annotated[int, Field(ge=1, le=100)] = 20
 

@@ -12,6 +12,7 @@ The current evidence-core slice is deliberately offline. It validates one synthe
 - Bounded record retrieval and case-scoped resource lookup.
 - Deterministic CLI overview and timeline.
 - Negative tests for malformed fixtures, traversal attempts, broken IDs, invalid windows, excessive result requests, and instruction-like evidence remaining inert.
+- Offline verification covering Ruff formatting/linting, strict mypy checks, pytest, and CLI smoke tests.
 
 ## Trust Boundary
 
@@ -26,8 +27,17 @@ Python 3.12 or newer is required.
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install --upgrade pip
-.venv/bin/python -m pip install -e '.[dev]'
+.venv/bin/python -m pip install -r requirements-dev.lock
+.venv/bin/python -m pip install --no-deps -e .
 make verify
+```
+
+`requirements-dev.lock` records the complete environment used for local verification. The direct application and development dependencies are also pinned in `pyproject.toml` so dependency automation can identify them later.
+
+The vulnerability audit queries current advisory data and therefore requires network access:
+
+```bash
+make audit
 ```
 
 ## Demo
@@ -63,3 +73,12 @@ They are ordinary Python methods for now. A model adapter or MCP interface will 
 - No autonomous remediation or disposition.
 
 The next slice will add a single human/AI investigation flow with structured output and an explicit plan-approval boundary.
+
+## Design Documentation
+
+- [Architecture](docs/architecture.md)
+- [Threat Model](docs/threat_model.md)
+
+## License
+
+MIT

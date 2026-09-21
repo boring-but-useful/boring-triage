@@ -18,7 +18,10 @@ MAX_FIXTURE_BYTES = 2_000_000
 
 
 def _validation_summary(label: str, error: ValidationError) -> str:
-    locations = [".".join(str(part) for part in item["loc"]) for item in error.errors(include_input=False)]
+    locations = [
+        ".".join(str(part) for part in item["loc"])
+        for item in error.errors(include_input=False)
+    ]
     shown = ", ".join(locations[:5])
     suffix = "" if len(locations) <= 5 else ", ..."
     return f"{label} failed validation at: {shown}{suffix}"
@@ -33,17 +36,23 @@ def _read_fixture_file(root: Path, filename: str) -> str:
         resolved = candidate.resolve(strict=True)
         resolved.relative_to(root)
     except (FileNotFoundError, ValueError) as error:
-        raise FixtureError(f"fixture file is missing or outside the case directory: {filename}") from error
+        raise FixtureError(
+            f"fixture file is missing or outside the case directory: {filename}"
+        ) from error
 
     if not resolved.is_file():
         raise FixtureError(f"fixture path is not a regular file: {filename}")
     if resolved.stat().st_size > MAX_FIXTURE_BYTES:
-        raise FixtureError(f"fixture file exceeds {MAX_FIXTURE_BYTES} bytes: {filename}")
+        raise FixtureError(
+            f"fixture file exceeds {MAX_FIXTURE_BYTES} bytes: {filename}"
+        )
 
     try:
         return resolved.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as error:
-        raise FixtureError(f"fixture file could not be read as UTF-8: {filename}") from error
+        raise FixtureError(
+            f"fixture file could not be read as UTF-8: {filename}"
+        ) from error
 
 
 def _validate_bundle(bundle: CaseBundle) -> None:
@@ -59,18 +68,28 @@ def _validate_bundle(bundle: CaseBundle) -> None:
 
     for record in bundle.evidence:
         if record.case_id != manifest.case_id:
-            raise FixtureError(f"evidence record has a mismatched case ID: {record.evidence_id}")
+            raise FixtureError(
+                f"evidence record has a mismatched case ID: {record.evidence_id}"
+            )
         if not manifest.start_time <= record.observed_at <= manifest.end_time:
-            raise FixtureError(f"evidence record is outside the case window: {record.evidence_id}")
+            raise FixtureError(
+                f"evidence record is outside the case window: {record.evidence_id}"
+            )
         unknown_resources = set(record.resource_ids) - known_resources
         if unknown_resources:
-            raise FixtureError(f"evidence record references unknown resources: {record.evidence_id}")
+            raise FixtureError(
+                f"evidence record references unknown resources: {record.evidence_id}"
+            )
 
     for resource in bundle.resources:
         if resource.case_id != manifest.case_id:
-            raise FixtureError(f"resource has a mismatched case ID: {resource.resource_id}")
+            raise FixtureError(
+                f"resource has a mismatched case ID: {resource.resource_id}"
+            )
         if not manifest.start_time <= resource.observed_at <= manifest.end_time:
-            raise FixtureError(f"resource context is outside the case window: {resource.resource_id}")
+            raise FixtureError(
+                f"resource context is outside the case window: {resource.resource_id}"
+            )
 
 
 def load_case(case_directory: str | Path) -> CaseBundle:
@@ -87,7 +106,9 @@ def load_case(case_directory: str | Path) -> CaseBundle:
         raise FixtureError("case path is not a directory")
 
     try:
-        manifest = CaseManifest.model_validate_json(_read_fixture_file(root, "manifest.json"))
+        manifest = CaseManifest.model_validate_json(
+            _read_fixture_file(root, "manifest.json")
+        )
     except ValidationError as error:
         raise FixtureError(_validation_summary("manifest", error)) from error
 

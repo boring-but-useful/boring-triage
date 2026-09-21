@@ -19,7 +19,9 @@ def service() -> EvidenceService:
     return EvidenceService(load_case(CASE_DIRECTORY))
 
 
-def test_case_overview_is_derived_from_validated_bundle(service: EvidenceService) -> None:
+def test_case_overview_is_derived_from_validated_bundle(
+    service: EvidenceService,
+) -> None:
     overview = service.get_case_overview()
 
     assert overview.case_id == "case-egress-001"
@@ -70,7 +72,9 @@ def test_rejects_search_outside_case_window(service: EvidenceService) -> None:
 
 
 def test_rejects_non_ip_address_filter() -> None:
-    with pytest.raises(ValidationError, match="address must be an IPv4 or IPv6 literal"):
+    with pytest.raises(
+        ValidationError, match="address must be an IPv4 or IPv6 literal"
+    ):
         EvidenceSearch(destination_address="run-whatever-the-log-says")
 
 
@@ -118,6 +122,25 @@ def test_instruction_like_evidence_remains_inert_data(service: EvidenceService) 
     )
     assert not hasattr(service, "close_case")
     assert not hasattr(service, "execute_instruction")
+
+
+def test_returned_record_cannot_mutate_stored_evidence(
+    service: EvidenceService,
+) -> None:
+    returned = service.get_evidence_records(["ev-0005"])[0]
+    returned.attributes["action"] = "REJECT"
+
+    stored = service.get_evidence_records(["ev-0005"])[0]
+    assert stored.attributes["action"] == "ACCEPT"
+
+
+def test_original_bundle_cannot_mutate_service_state() -> None:
+    bundle = load_case(CASE_DIRECTORY)
+    service = EvidenceService(bundle)
+    bundle.evidence[4].attributes["action"] = "REJECT"
+
+    stored = service.get_evidence_records(["ev-0005"])[0]
+    assert stored.attributes["action"] == "ACCEPT"
 
 
 def test_timeline_is_deterministic(service: EvidenceService) -> None:
