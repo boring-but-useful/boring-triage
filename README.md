@@ -1,8 +1,8 @@
 # Boring Triage
 
-Boring Triage is an early-stage, local-first incident-review project. Its goal is to demonstrate how a human and an AI assistant can investigate bounded cloud-security evidence without confusing model output with fact or giving the model autonomous response authority.
+Boring Triage is a local-first incident-review project. It demonstrates how a human and an AI assistant can investigate bounded cloud-security evidence without confusing model output with fact or giving the model autonomous response authority.
 
-The current evidence-core slice is deliberately offline. It validates one synthetic AWS incident bundle, exposes four case-scoped read-only evidence operations, and prints a deterministic timeline. It does not yet call a model, provide a web interface, or connect to AWS.
+The current vertical slice validates one synthetic AWS incident bundle, lets either a deterministic fake adapter or an optional OpenAI adapter propose a typed investigation plan, requires explicit human approval of the saved plan, executes only case-scoped read-only operations, validates every cited evidence ID, and records the AI recommendation separately from the human decision. It does not connect to AWS or provide remediation tools.
 
 ## Current Capabilities
 
@@ -11,6 +11,10 @@ The current evidence-core slice is deliberately offline. It validates one synthe
 - Structured searches by source, time, resource, address, and event category.
 - Bounded record retrieval and case-scoped resource lookup.
 - Deterministic CLI overview and timeline.
+- Typed investigation plans and analyses with bounded fields and operations.
+- A reviewable plan artifact that must be explicitly approved before execution.
+- Application-enforced citation validation and separate AI/human dispositions.
+- Deterministic offline adapter plus an optional live OpenAI adapter.
 - Negative tests for malformed fixtures, traversal attempts, broken IDs, invalid windows, excessive result requests, and instruction-like evidence remaining inert.
 - Offline verification covering Ruff formatting/linting, strict mypy checks, pytest, and CLI smoke tests.
 
@@ -18,7 +22,7 @@ The current evidence-core slice is deliberately offline. It validates one synthe
 
 All fixture content is untrusted data. A record can contain text that looks like an instruction, but the evidence layer only validates, filters, returns, and displays that text. It does not interpret it as a command.
 
-The project currently has no shell, arbitrary-file, SQL, external-network, cloud-write, remediation, or case-closing capability.
+The model receives no shell, filesystem, SQL, arbitrary-network, cloud-write, remediation, or case-state tool. The optional provider adapter can only submit bounded structured requests to OpenAI. Final disposition remains a human-owned record.
 
 ## Local Setup
 
@@ -53,6 +57,36 @@ Or run the commands separately:
 .venv/bin/python -m boring_triage --case fixtures/case-egress-001 timeline
 ```
 
+The complete human-gated flow works offline. First save a proposed plan:
+
+```bash
+.venv/bin/python -m boring_triage \
+  --case fixtures/case-egress-001 \
+  plan --provider fake --output /tmp/boring-triage-plan.json
+```
+
+Read the JSON plan. If it is acceptable, explicitly approve that exact artifact and record a human decision:
+
+```bash
+.venv/bin/python -m boring_triage \
+  --case fixtures/case-egress-001 \
+  investigate \
+  --plan /tmp/boring-triage-plan.json \
+  --approve-plan \
+  --approved-by local-analyst \
+  --disposition continue_investigation \
+  --decision-note "Collect process telemetry before closure." \
+  --output /tmp/boring-triage-report.md
+```
+
+Omitting `--approve-plan` fails closed before evidence operations or analysis occur.
+
+## Optional Live Model
+
+Copy `.env.example` to `.env.local`, add an API key, and keep the file local. The CLI reads only `OPENAI_API_KEY` from that file and never prints it. Then replace `--provider fake` in the planning command with `--provider openai`. The saved artifact binds the provider and model used for both stages.
+
+Only synthetic, public-safe case data should be sent to a model provider. See [Model Setup](docs/model_setup.md) for the credential and live-run process.
+
 ## Evidence Operations
 
 The core implements four operations:
@@ -62,22 +96,24 @@ The core implements four operations:
 3. `get_evidence_records`
 4. `get_resource_context`
 
-They are ordinary Python methods for now. A model adapter or MCP interface will be considered only after the evidence boundary is stable.
+They remain ordinary Python methods behind the orchestrator. The model proposes typed calls; application code validates and executes them only after approval. The model does not receive executable tools directly.
 
 ## Deliberate Limits
 
 - Synthetic fixtures only.
 - One case.
-- No live model or cloud credentials.
+- Live model use is optional; cloud credentials are not supported.
 - No claim that an accepted flow-log record identifies the initiating process.
 - No autonomous remediation or disposition.
 
-The next slice will add a single human/AI investigation flow with structured output and an explicit plan-approval boundary.
+- No claim that a valid citation necessarily supports the sentence that cites it; semantic citation evaluation remains future work.
+- No web interface, persistent database, multi-user authorization, or production retention controls.
 
 ## Design Documentation
 
 - [Architecture](docs/architecture.md)
 - [Threat Model](docs/threat_model.md)
+- [Model Setup](docs/model_setup.md)
 
 ## License
 
