@@ -4,6 +4,10 @@ Boring Triage is a local-first incident-review project. It demonstrates how a hu
 
 The current vertical slice validates one synthetic AWS incident bundle, lets either a deterministic fake adapter or an optional OpenAI adapter propose a typed investigation plan, requires explicit human approval of the saved plan, executes only case-scoped read-only operations, validates every cited evidence ID, and records the AI recommendation separately from the human decision. It does not connect to AWS or provide remediation tools.
 
+## AI-Assisted Development
+
+This project was developed with AI-assisted tooling for research, design exploration, implementation support, documentation, and review. Project direction, architecture decisions, testing requirements, and final changes are reviewed and owned by the maintainer.
+
 ## Current Capabilities
 
 - Strict Pydantic validation for case manifests, evidence records, and resource context.
