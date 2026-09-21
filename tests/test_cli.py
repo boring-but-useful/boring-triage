@@ -23,3 +23,74 @@ def test_timeline_command_prints_evidence_in_order(capsys) -> None:  # type: ign
     assert result == 0
     assert output.index("ev-0001") < output.index("ev-0011")
     assert "203.0.113.42" not in output
+
+
+def test_fake_investigation_requires_explicit_approval(tmp_path: Path, capsys) -> None:  # type: ignore[no-untyped-def]
+    plan = tmp_path / "plan.json"
+    report = tmp_path / "report.md"
+    assert (
+        main(
+            [
+                "--case",
+                str(CASE_DIRECTORY),
+                "plan",
+                "--provider",
+                "fake",
+                "--output",
+                str(plan),
+            ]
+        )
+        == 0
+    )
+
+    result = main(
+        [
+            "--case",
+            str(CASE_DIRECTORY),
+            "investigate",
+            "--plan",
+            str(plan),
+            "--disposition",
+            "continue_investigation",
+            "--decision-note",
+            "Gather process telemetry.",
+            "--output",
+            str(report),
+        ]
+    )
+
+    assert result == 2
+    assert not report.exists()
+    assert "not approved" in capsys.readouterr().out
+
+
+def test_fake_investigation_writes_cited_report(tmp_path: Path) -> None:
+    plan = tmp_path / "plan.json"
+    report = tmp_path / "report.md"
+    assert main(["--case", str(CASE_DIRECTORY), "plan", "--output", str(plan)]) == 0
+
+    result = main(
+        [
+            "--case",
+            str(CASE_DIRECTORY),
+            "investigate",
+            "--plan",
+            str(plan),
+            "--approve-plan",
+            "--approved-by",
+            "test-analyst",
+            "--disposition",
+            "continue_investigation",
+            "--decision-note",
+            "Gather process telemetry.",
+            "--output",
+            str(report),
+        ]
+    )
+
+    assert result == 0
+    content = report.read_text(encoding="utf-8")
+    assert "## AI Recommendation" in content
+    assert "## Human Decision" in content
+    assert "`ev-0005`" in content
+    assert "Final disposition: `continue_investigation`" in content
