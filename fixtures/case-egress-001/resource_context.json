@@ -1,0 +1,86 @@
+{
+  "resources": [
+    {
+      "resource_id": "instance-demo-017",
+      "case_id": "case-egress-001",
+      "resource_type": "ec2_instance",
+      "observed_at": "2026-09-21T14:00:00Z",
+      "attributes": {
+        "environment": "demo",
+        "service": "document-worker",
+        "private_address": "10.20.1.17",
+        "instance_profile": "role-demo-workload",
+        "network_interface": "eni-demo-017"
+      },
+      "trust": "untrusted_input"
+    },
+    {
+      "resource_id": "eni-demo-017",
+      "case_id": "case-egress-001",
+      "resource_type": "network_interface",
+      "observed_at": "2026-09-21T14:00:00Z",
+      "attributes": {
+        "private_address": "10.20.1.17",
+        "subnet": "subnet-demo-private",
+        "security_group": "sg-demo-egress",
+        "attached_instance": "instance-demo-017"
+      },
+      "trust": "untrusted_input"
+    },
+    {
+      "resource_id": "role-demo-workload",
+      "case_id": "case-egress-001",
+      "resource_type": "iam_role",
+      "observed_at": "2026-09-21T14:00:00Z",
+      "attributes": {
+        "trusted_service": "ec2.amazonaws.com",
+        "policy_profile": "narrow-workload-access"
+      },
+      "trust": "untrusted_input"
+    },
+    {
+      "resource_id": "sg-demo-egress",
+      "case_id": "case-egress-001",
+      "resource_type": "security_group",
+      "observed_at": "2026-09-21T14:00:00Z",
+      "attributes": {
+        "egress_profile": "tcp-443-anywhere",
+        "attached_interface": "eni-demo-017"
+      },
+      "trust": "untrusted_input"
+    },
+    {
+      "resource_id": "subnet-demo-private",
+      "case_id": "case-egress-001",
+      "resource_type": "subnet",
+      "observed_at": "2026-09-21T14:00:00Z",
+      "attributes": {
+        "route_profile": "default-through-nat",
+        "internet_routable": false
+      },
+      "trust": "untrusted_input"
+    },
+    {
+      "resource_id": "instance-demo-099",
+      "case_id": "case-egress-001",
+      "resource_type": "ec2_instance",
+      "observed_at": "2026-09-21T14:00:00Z",
+      "attributes": {
+        "environment": "demo",
+        "service": "unrelated-status-page",
+        "private_address": "10.20.2.99"
+      },
+      "trust": "untrusted_input"
+    },
+    {
+      "resource_id": "role-demo-deploy",
+      "case_id": "case-egress-001",
+      "resource_type": "iam_role",
+      "observed_at": "2026-09-21T14:00:00Z",
+      "attributes": {
+        "purpose": "synthetic deployment activity"
+      },
+      "trust": "untrusted_input"
+    }
+  ]
+}

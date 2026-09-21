@@ -1,0 +1,12 @@
+{
+  "case_id": "case-egress-001",
+  "version": 1,
+  "title": "Unexpected outbound TLS connection",
+  "description": "Review synthetic AWS evidence for an EC2 workload that contacted a locally watchlisted documentation address.",
+  "start_time": "2026-09-21T14:00:00Z",
+  "end_time": "2026-09-21T14:15:00Z",
+  "evidence_file": "evidence.json",
+  "resource_context_file": "resource_context.json",
+  "max_search_results": 25,
+  "max_record_details": 10
+}
