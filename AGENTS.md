@@ -22,6 +22,7 @@
 - Preserve the distinction between observed facts, AI inference, uncertainty, recommendation, and human decision.
 - Keep evidence tools read-only, case-scoped, structured, and size-limited.
 - Add a dependency only when the current slice needs it.
+- Keep direct dependency pins in `pyproject.toml` synchronized with `requirements-dev.lock`; dependency updates must change both files and pass the consistency test.
 - Introduce a shared provider or tool abstraction only after two real implementations require it.
 - Fail closed on malformed fixtures, broken references, invalid citations, unsupported fields, or unauthorized state changes.
 
