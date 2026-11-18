@@ -23,6 +23,7 @@
 - Keep evidence tools read-only, case-scoped, structured, and size-limited.
 - Add a dependency only when the current slice needs it.
 - Keep direct dependency pins in `pyproject.toml` synchronized with `requirements-dev.lock`; dependency updates must change both files and pass the consistency test.
+- Regenerate the custom lock with `uv pip compile pyproject.toml --extra dev --python-version 3.12 --no-header --no-annotate --output-file requirements-dev.lock`. Preserve unrelated pins unless compatibility or an advisory requires a change. Grouped Dependabot PRs still require this manual lock regeneration; do not bypass the consistency test.
 - Introduce a shared provider or tool abstraction only after two real implementations require it.
 - Fail closed on malformed fixtures, broken references, invalid citations, unsupported fields, or unauthorized state changes.
 
