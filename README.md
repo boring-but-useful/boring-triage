@@ -42,6 +42,23 @@ make verify
 
 `requirements-dev.lock` records the complete environment used for local verification. The direct application and development dependencies are also pinned in `pyproject.toml` so dependency automation can identify them later.
 
+### Updating Dependencies
+
+Update direct pins in `pyproject.toml`, then regenerate `requirements-dev.lock`
+with [uv](https://docs.astral.sh/uv/pip/compile/):
+
+```bash
+uv pip compile pyproject.toml --extra dev --python-version 3.12 \
+  --no-header --no-annotate --output-file requirements-dev.lock
+```
+
+The existing lock keeps unrelated versions stable when compatible. Use
+`--upgrade-package PACKAGE` for a deliberate transitive upgrade, then install the
+lock in a clean virtual environment and run `make verify` and `make audit`.
+Commit the manifest and lock together. Dependabot groups Python updates to reduce
+PR churn, but it does not regenerate this custom-named lockfile; a manifest-only
+update must be completed before merging. The consistency test enforces this.
+
 The vulnerability audit queries current advisory data and therefore requires network access:
 
 ```bash

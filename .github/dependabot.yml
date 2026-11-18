@@ -9,6 +9,11 @@ updates:
       time: "12:00"
       timezone: America/New_York
     open-pull-requests-limit: 5
+    groups:
+      # Grouping reduces PR churn; the custom lockfile still needs regeneration.
+      python-dependencies:
+        patterns:
+          - "*"
 
   - package-ecosystem: github-actions
     directory: /
